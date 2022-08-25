@@ -13,13 +13,10 @@ export const main = Reach.App(() => {
     grades: Array(Grade, 1100)
   });
 
-  const courses= Array(Course, 1100);
-
-
-  const Instructor = API('Instructor', {
+  const Instructor = Participant('Instructor', {
     publishCourse: Fun([Course], Null),
-    giveGrade: Fun([Address, UInt], Null)
-
+    giveGrade: Fun([Address, UInt], Null),
+    courses: Array(Course, 1100)
   });
 
   const Student = API('Student', { 
@@ -29,6 +26,10 @@ export const main = Reach.App(() => {
 
   const coursesView = View('Courses', { currentCourses: Array(Course, 1100) })
   init();
+
+
+
+  
 
   // coursesView.currentCourses.set(courses);
   commit();
