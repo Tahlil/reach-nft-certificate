@@ -11,18 +11,19 @@ export const main = Reach.App(() => {
 
   const Course = Object({
     name: Bytes(256),
-    enroll: Array(Address, 1100),
-    grades: Array(Grade, 1100)
+    enroll: Array(Address, 100),
+    grades: Array(Grade, 100),
+    numberOfStudents: UInt
   });
 
   const Instructor = API('Instructor', {
-    publishCourse: Fun([Course], Null),
+    publishCourse: Fun([Bytes(256)], Null),
     getCourse: Fun([UInt], Data({"None": Null, "Some": Course})),
     giveGrade: Fun([Address, UInt], Null),
   });
 
   const Student = API('Student', { 
-    enrollCourse: Fun([Address, UInt], Null),
+    enrollCourse: Fun([UInt], Null),
     issueCertificate: Fun([UInt], Null) 
   });
 
@@ -39,10 +40,17 @@ export const main = Reach.App(() => {
   parallelReduce( 0 )
   .invariant(balance() == 0)
   .while(true)
-  .api_(Instructor.publishCourse, (course) => {
+  .api_(Instructor.publishCourse, (courseName) => {
     return [0, (ret) => {
       ret(null);
-      courses[currentCourseNumber] = course;
+      const arr1 = Array(Address, 100);
+      const arr2 = Array(Grade, 100);
+      courses[currentCourseNumber] = {
+        name: courseName,
+        enroll: arr1,
+        grades: arr2,
+        numberOfStudents: 0
+      }
       CourseEvents.addCourse(currentCourseNumber);
       return currentCourseNumber + 1;
     }]})
@@ -50,7 +58,14 @@ export const main = Reach.App(() => {
       return [0, (ret) => {
         ret(courses[courseID]);
         return currentCourseNumber;
-      }]});
+      }]})
+      .api_(Student.enrollCourse, (courseIDToEnroll) => {
+        return [0, (ret) => {
+          assert(!isSome(courses[courseIDToEnroll]), "Already enrolled");
+
+          ret(Null);
+          return currentCourseNumber;
+        }]});
   
   // coursesView.currentCourses.set(courses);
   commit();
