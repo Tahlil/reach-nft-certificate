@@ -34,36 +34,7 @@ export const main = Reach.App(() => {
 
   const courses = new Map(UInt, Course);
   
-  const currentCourseNumber  =
-  parallelReduce( 0 )
-  .invariant(balance() == 0)
-  .while(true)
-  .api_(Instructor.publishCourse, (courseName) => {
-    return [0, (ret) => {
-      ret(null);
-      const arr1 = Array(Address, 100);
-      const arr2 = Array(Grade, 100);
-      courses[currentCourseNumber] = {
-        name: courseName,
-        enroll: arr1,
-        grades: arr2,
-        numberOfStudents: 0
-      }
-      CourseEvents.addCourse(currentCourseNumber);
-      return currentCourseNumber + 1;
-    }]})
-    .api_(Instructor.getCourse, (courseID) => {
-      return [0, (ret) => {
-        ret(courses[courseID]);
-        return currentCourseNumber;
-      }]})
-      .api_(Student.enrollCourse, (courseIDToEnroll) => {
-        return [0, (ret) => {
-          assert(!isSome(courses[courseIDToEnroll]), "Already enrolled");
-
-          ret(Null);
-          return currentCourseNumber;
-        }]});
+  
   
   // coursesView.currentCourses.set(courses);
   commit();
