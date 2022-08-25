@@ -26,12 +26,11 @@ export const main = Reach.App(() => {
     enrollCourse: Fun([Address, UInt], Null),
     verifyCertificate: Fun([UInt], Bool) 
   });
+
+  const coursesView = View('Courses', { currentCourses: Array(Course, 1100) })
   init();
-  // The first one to publish deploys the contract
-  A.publish();
-  commit();
-  // The second one to publish always attaches
-  B.publish();
+
+  // coursesView.currentCourses.set(courses);
   commit();
   // write your program here
   exit();
