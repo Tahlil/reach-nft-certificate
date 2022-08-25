@@ -2,8 +2,6 @@
 
 export const main = Reach.App(() => {
 
- const Admin = Participant('Admin', {})
-
   const Grade = Object({
     student: Address,
     grade: UInt
@@ -16,13 +14,13 @@ export const main = Reach.App(() => {
     numberOfStudents: UInt
   });
 
-  const Instructor = API('Instructor', {
-    publishCourse: Fun([Bytes(256)], Null),
-    getCourse: Fun([UInt], Data({"None": Null, "Some": Course})),
+  const Instructor = Participant('Instructor', {
+    course: Course,
+    getCourse: Fun([], Data({"None": Null, "Some": Course})),
     giveGrade: Fun([Address, UInt], Null),
   });
 
-  const Student = API('Student', { 
+  const Student = Participant('Student', { 
     enrollCourse: Fun([UInt], Null),
     issueCertificate: Fun([UInt], Null) 
   });
@@ -32,7 +30,7 @@ export const main = Reach.App(() => {
   })
   init();
  
-  Admin.publish();
+  Instructor.publish();
 
   const courses = new Map(UInt, Course);
   
