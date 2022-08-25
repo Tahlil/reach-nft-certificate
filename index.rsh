@@ -25,7 +25,9 @@ export const main = Reach.App(() => {
     issueCertificate: Fun([UInt], Null) 
   });
 
-  const coursesView = View('Courses', { currentCourses: Array(Course, 1100) })
+  const CourseEvents = Events({
+    addCourse: [UInt]
+  })
   init();
  
   Admin.publish();
@@ -40,6 +42,7 @@ export const main = Reach.App(() => {
     return [0, (ret) => {
       ret(null);
       courses[currentCourseNumber] = course;
+      CourseEvents.addCourse(currentCourseNumber);
       return currentCourseNumber + 1;
     }]});
   
