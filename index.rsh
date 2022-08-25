@@ -13,12 +13,18 @@ export const main = Reach.App(() => {
     grades: Array(Grade, 1100)
   });
 
-  const Instructor = Participant('Instructor', {
-    // Specify Alice's interact interface here
-    publishCourse: Fun()
+  const courses= Array(Course, 1100);
+
+
+  const Instructor = API('Instructor', {
+    publishCourse: Fun([Course], Null),
+    giveGrade: Fun([Address, UInt], Null)
+
   });
-  const B = Participant('Bob', {
-    // Specify Bob's interact interface here
+
+  const Student = API('Student', { 
+    enrollCourse: Fun([Address, UInt], Null),
+    verifyCertificate: Fun([UInt], Bool) 
   });
   init();
   // The first one to publish deploys the contract
