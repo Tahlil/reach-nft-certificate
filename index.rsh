@@ -17,6 +17,7 @@ export const main = Reach.App(() => {
 
   const Instructor = API('Instructor', {
     publishCourse: Fun([Course], Null),
+    getCourse: Fun([UInt], Data({"None": Null, "Some": Course})),
     giveGrade: Fun([Address, UInt], Null),
   });
 
@@ -44,7 +45,12 @@ export const main = Reach.App(() => {
       courses[currentCourseNumber] = course;
       CourseEvents.addCourse(currentCourseNumber);
       return currentCourseNumber + 1;
-    }]});
+    }]})
+    .api_(Instructor.getCourse, (courseID) => {
+      return [0, (ret) => {
+        ret(courses[courseID]);
+        return currentCourseNumber;
+      }]});
   
   // coursesView.currentCourses.set(courses);
   commit();
