@@ -35,7 +35,7 @@ export const main = Reach.App(() => {
   Instructor.publish();
 
   const courses = new Map(UInt, Course);
-  const enroll = new Map(Tuple(UInt, Address), Bool);
+  // const enroll = new Map(Tuple(UInt, Address), Bool);
 
   
   commit();
@@ -73,7 +73,7 @@ export const main = Reach.App(() => {
   const nftAmt = 1;
 
   var [ studentsEnrolled, studentsGraded  ] = array(UInt, [0,0]);
-  invariant(balance() == 0);
+  invariant(balance() == 0 && balance(nftId) == 0);
   while(studentsGraded != maxStudent) {
     commit();
     Student.only(() => {
@@ -104,7 +104,9 @@ export const main = Reach.App(() => {
     // [studentsEnrolled,studentsGraded] = studentsEnrolled + 1, studentsGraded+1;
     continue;
   }
+  // transfer(balance(), nftId).to(Instructor);
   commit();
-  // write your program here
+
+
   exit();
 });
