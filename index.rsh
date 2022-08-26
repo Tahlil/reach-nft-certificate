@@ -21,7 +21,7 @@ export const main = Reach.App(() => {
   });
 
   const courseView = View({ 
-    getCourse: Fun([UInt],  Course),
+    getCourse: Tuple(Bytes(32), Bytes(256)),
     getEnrollment: Fun([UInt, Address], Bool)
   });
 
@@ -53,6 +53,7 @@ export const main = Reach.App(() => {
     const nftId = declassify(interact.certificateNFT);
   });
   Instructor.publish(nftId);
+ 
   const { name, description, courseID } = courseDetails;
   assert(isNone(courses[courseID]));
  
@@ -64,9 +65,9 @@ export const main = Reach.App(() => {
     name: name,
     description: description
   }) 
-  courseView.getCourse.set((id) => fromSome(courses[id], DEFAULT_COURSE_IF_NOT_FOUND));
- 
- 
+  courseView.getCourse.set([name, description]);
+  commit();
+  Instructor.publish();
   CourseEvents.addCourse(courseID);
 
   const maxStudent = 3;
