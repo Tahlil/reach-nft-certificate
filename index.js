@@ -72,12 +72,8 @@ class App extends React.Component {
        const {name, description, courseID} = this.courseDetails;
        console.log(this.state.ctc);
        const res = await this.state.ctc.v.getCourse();
-       const res2 = await this.state.ctc.views.getCourse();
        console.log("Res: ");
        console.log(res);
-       console.log("Res2: ");
-       console.log(res2);
-
        this.setState({view: 'CourseSection', name, description, courseID, res});
     }
 
