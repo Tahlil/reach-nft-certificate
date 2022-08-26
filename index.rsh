@@ -3,7 +3,7 @@
 export const main = Reach.App(() => {
 
  
-
+  
   const Course = Object({
     name: Bytes(256),
     enroll: Array(Address, 3),
@@ -13,7 +13,6 @@ export const main = Reach.App(() => {
 
   const Instructor = Participant('Instructor', {
     courseDetails: Object({name: Bytes(256), courseID: UInt}),
-    getCourse: Fun([UInt], Data({"None": Null, "Some": Course})),
     giveGrade: Fun([Address, UInt], Null),
   });
 
@@ -21,6 +20,8 @@ export const main = Reach.App(() => {
     enrollCourse: Fun([UInt], Null),
     issueCertificate: Fun([UInt], Null) 
   });
+
+  const courseView = View('ShowCourse', { getCourse: Fun([UInt], Course) });
 
   const CourseEvents = Events({
     addCourse: [UInt]
@@ -38,16 +39,18 @@ export const main = Reach.App(() => {
   Instructor.publish(courseDetails);
   const { name, courseID } = courseDetails;
   assert(isNone(courses[courseID]));
-  const arr = Array(Address, 100);
+
   courses[courseID] = {
     name: name,
     enroll: array(Address, [getAddress(), getAddress(), getAddress()]),
     grades: array(UInt, [0,0,0]),
     numberOfStudents: 0
   }
+  courseView.getCourse.set((id) => Maybe(courses[id]));
   CourseEvents.addCourse(courseID);
   commit();
-  
+
+
  
 
   // write your program here
