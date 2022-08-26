@@ -2,21 +2,18 @@
 
 export const main = Reach.App(() => {
 
-  const Grade = Object({
-    student: Address,
-    grade: UInt
-  })
+ 
 
   const Course = Object({
     name: Bytes(256),
-    enroll: Array(Address, 100),
-    grades: Array(Grade, 100),
+    enroll: Array(Address, 3),
+    grades: Array(UInt, 3),
     numberOfStudents: UInt
   });
 
   const Instructor = Participant('Instructor', {
-    course: Course,
-    getCourse: Fun([], Data({"None": Null, "Some": Course})),
+    courseDetails: Object({name: Bytes(256), courseID: UInt}),
+    getCourse: Fun([UInt], Data({"None": Null, "Some": Course})),
     giveGrade: Fun([Address, UInt], Null),
   });
 
@@ -33,11 +30,26 @@ export const main = Reach.App(() => {
   Instructor.publish();
 
   const courses = new Map(UInt, Course);
-  
-  
-  
-  // coursesView.currentCourses.set(courses);
   commit();
+
+  Instructor.only(() => {
+    const courseDetails = declassify(interact.courseDetails);
+  })
+  Instructor.publish(courseDetails);
+  const { name, courseID } = courseDetails;
+  assert(isNone(courses[courseID]));
+  const arr = Array(Address, 100);
+  courses[courseID] = {
+    name: name,
+    enroll: array(Address, [getAddress(), getAddress(), getAddress()]),
+    grades: array(UInt, [0,0,0]),
+    numberOfStudents: 0
+  }
+  CourseEvents.addCourse(courseID);
+  commit();
+  
+ 
+
   // write your program here
   exit();
 });
