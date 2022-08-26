@@ -21,11 +21,11 @@ export const main = Reach.App(() => {
     issueCertificate: Fun([UInt], Null) 
   });
 
-  const courseView = View('ShowCourse', { getCourse: Fun([UInt], Course) });
+  const courseView = View('ShowCourse', { getCourse: Fun([UInt], Course), isEnrolled: Fun([Address, UInt], Bool) });
 
   const CourseEvents = Events({
     addCourse: [UInt]
-  })
+  });
   init();
  
   Instructor.publish();
@@ -39,14 +39,15 @@ export const main = Reach.App(() => {
   Instructor.publish(courseDetails);
   const { name, courseID } = courseDetails;
   assert(isNone(courses[courseID]));
-
+  const contractAddress = getAddress(); 
   courses[courseID] = {
     name: name,
-    enroll: array(Address, [getAddress(), getAddress(), getAddress()]),
+    enroll: array(Address, [contractAddress, contractAddress, contractAddress]),
     grades: array(UInt, [0,0,0]),
     numberOfStudents: 0
   }
   courseView.getCourse.set((id) => Maybe(courses[id]));
+  courseView.isEnrolled.set((studentAdr, id) => Array.includes(courses[id].enroll, studentAdr));
   CourseEvents.addCourse(courseID);
   commit();
 
