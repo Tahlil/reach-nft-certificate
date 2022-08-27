@@ -3,7 +3,6 @@
 export const main = Reach.App(() => {
 
  
-  
   const Course = Struct([
     ['name', Bytes(32)],
     ['description', Bytes(256)]
@@ -21,68 +20,49 @@ export const main = Reach.App(() => {
   });
 
   const courseView = View({ 
-    getCourse: Tuple(Bytes(32), Bytes(256)),
-    getEnrollment: Fun([UInt, Address], Bool)
+    getCourse: Tuple(Bytes(32), Bytes(256), UInt, Token)
   });
 
-  const CourseEvents = Events({
-    addCourse: [UInt],
-    logEnroll: [Address, UInt]
-  });
-
+  // const CourseEvents = Events({
+  //   addCourse: [UInt],
+  // });
   init();
- 
-  Instructor.publish();
-
-  const courses = new Map(UInt, Course);
-  // const enroll = new Map(Tuple(UInt, Address), Bool);
-
-  
-  commit();
-  Student.publish();
-  commit();
-
-  
-
   Instructor.only(() => {
     const courseDetails = declassify(interact.courseDetails);
-  })
-  Instructor.publish(courseDetails);
-  commit();
-  Instructor.only(() => {
     const nftId = declassify(interact.certificateNFT);
-  });
-  Instructor.publish(nftId);
- 
+  })
+  Instructor.publish(courseDetails, nftId);
+  // const courses = new Map(UInt, Course);
+  
+
   const { name, description, courseID } = courseDetails;
-  assert(isNone(courses[courseID]));
- 
-  const DEFAULT_COURSE_IF_NOT_FOUND = Course.fromObject({
-    name: "Lorem ipsum dolor sit amet orci.",
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec faucibus mi erat, et mattis leo sagittis id. Proin ornare mi ut urna tempus rutrum. Nulla vitae enim sit amet arcu volutpat vestibulum. Aliquam fermentum est et felis convallis feugiat. Sed et."
-  });
-  courses[courseID] = Course.fromObject({
-    name: name,
-    description: description
-  }) 
-  courseView.getCourse.set([name, description]);
-  commit();
-  Instructor.publish();
-  CourseEvents.addCourse(courseID);
+  // assert(isNone(courses[courseID]));
+  // const DEFAULT_COURSE_IF_NOT_FOUND = Course.fromObject({
+  //   name: "Lorem ipsum dolor sit amet orci.",
+  //   description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec faucibus mi erat, et mattis leo sagittis id. Proin ornare mi ut urna tempus rutrum. Nulla vitae enim sit amet arcu volutpat vestibulum. Aliquam fermentum est et felis convallis feugiat. Sed et."
+  // });
+  // courses[courseID] = Course.fromObject({
+  //   name: name,
+  //   description: description
+  // }) 
+  courseView.getCourse.set([name, description, courseID, nftId]);
 
-  const maxStudent = 3;
+  // CourseEvents.addCourse(courseID);
+
+  const maxStudent = 1;
   const nftAmt = 1;
-
+  commit();
+  Student.publish();
+  
   var [ studentsEnrolled, studentsGraded  ] = array(UInt, [0,0]);
   invariant(balance() == 0 && balance(nftId) == 0);
-  while(studentsGraded != maxStudent) {
+  while(studentsEnrolled != maxStudent) {
     commit();
     Student.only(() => {
       assume(studentsEnrolled<maxStudent);
       const enrolledCourseID = declassify(interact.enrollCourse());
     });
     Student.publish(enrolledCourseID);
-    CourseEvents.logEnroll(Student, enrolledCourseID);
     commit();
     Instructor.only(() => {
       const grade = declassify(interact.giveGrade(Student));
@@ -96,11 +76,14 @@ export const main = Reach.App(() => {
       Instructor.pay([[nftAmt, nftId]]);
       transfer(nftAmt, nftId).to(Student);
     }
+    const currentGrade = grade;
     commit();
+    
     Student.only(() => {
-      interact.getGrade(grade);
+      interact.getGrade(currentGrade);
     });
     Student.publish();
+   
     studentsEnrolled = studentsEnrolled + 1; 
     // [studentsEnrolled,studentsGraded] = studentsEnrolled + 1, studentsGraded+1;
     continue;

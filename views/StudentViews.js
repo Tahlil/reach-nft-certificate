@@ -47,46 +47,66 @@ exports.Attaching = class extends React.Component {
   }
 }
 
-exports.WaitingForResults = class extends React.Component {
+exports.GetCourseID = class extends React.Component {
   render() {
-    return (
-      <div>
-        Waiting for results...
-      </div>
-    );
-  }
-}
-
-exports.ReadFortune = class extends React.Component {
-  render() {
-    const {parent} = this.props;
-    let fortune =(this.state || {}).fortune || "default";
-    
+    const {parent, courseName, courseDescription, courseID} = this.props;
+   
     function handleClick() {
-      console.log("Handle click, Fortune is: ", fortune);
-      parent.tellFortune(fortune)
+      console.log("Handle click, course ID is: ", courseID);
+      parent.setCourseID(courseID)
     }
 
-    function handleChange(e){
-      console.log("Changed Value:", e.currentTarget.value);
-      fortune=e.currentTarget.value;
-      console.log("Fortune is ", fortune);
-    }
+   
     return (
       <div>
-        <input
-          type='text'
-          placeholder="Writeup the fortune"
-          onChange={(e) => handleChange(e)}
-        /> 
+        <p>Course Name: <span>{courseName}</span></p>
+        <p>Course Description: <span>{courseDescription}</span></p>
+        <p>Course ID: <span>{courseID}</span></p>
         <br />
         <button
         
           onClick={handleClick}
-        >Read Fortune</button>
+        >Enroll Course</button>
       </div>
     );
   }
 }
+
+
+exports.ShowResult = class extends React.Component {
+  render() {
+    const {parent, gradeInNumber, courseName, courseDescription, courseID, nftBalance} = this.props;
+    console.log("Show Result");
+    return(
+    <div>
+    <h1>Course Result</h1>
+    <p>Course Name: <span>{courseName}</span></p>
+    <p>Course Description: <span>{courseDescription}</span></p>
+    <p>Course ID: <span>{courseID}</span></p>
+    <h3>Grade earned: <span>{gradeInNumber}</span></h3>
+    <h3>NFT Certificates: <span>{nftBalance}</span></h3>
+    <br />
+    </div>
+    );
+    
+
+  }
+}
+
+
+exports.WaitingForResults = class extends React.Component {
+  render() {
+    const {enrolledCourseID, nftBalance} = this.props;
+    return (
+      <div>
+        Waiting for results from course {enrolledCourseID}
+        <br />
+        Current NFT Balance: {nftBalance}
+      </div>
+    );
+  }
+}
+
+
 
 export default exports;

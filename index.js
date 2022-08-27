@@ -47,9 +47,6 @@ class App extends React.Component {
        this.state = {view: 'SetCourseDetails'};
     }
 
-
-    
-
     setCourseDetails(courseName, courseDescription) { this.setState({view: 'Deploy', courseName, courseDescription}); }
   
     async deploy() {
@@ -59,36 +56,46 @@ class App extends React.Component {
       this.deadline = {ETH: 10, ALGO: 100, CFX: 1000}[reach.connector];
       const certificateNFT = await reach.launchToken(this.props.acc, "CertNFT", "NFT", { supply: 3 });
       const nftId = certificateNFT.id;
+     
+      const nftBalance = parseInt((await this.props.acc.balanceOf(nftId))._hex, 16);
+      console.log("NFT balance", nftBalance);
       console.log("NFT ID", nftId);
       this.certificateNFT = nftId;
       backend.Instructor(ctc, this);
       const ctcInfoStr = JSON.stringify(await ctc.getInfo(), null, 2);
       this.setState({ ctc });
-      this.setState({view: 'WaitingForAttacher', ctcInfoStr, nftId});
+      this.setState({view: 'WaitingForAttacher', ctcInfoStr, nftId, nftBalance});
     }
 
     async showCourse(){
         console.log("Calling show course....");
-       const {name, description, courseID} = this.courseDetails;
-       console.log(this.state.ctc);
        const res = await this.state.ctc.v.getCourse();
-       console.log("Res: ");
-       console.log(res);
+       const [name, description, hexNum] = res[1];
+      
+       console.log(hexNum);
+       const courseID = parseInt(hexNum._hex, 16);
+        //  const courseID = 11;
+       console.log("Cours ID", courseID);
+       console.log("Res[1]: ");
+       console.log(res[1]);
        this.setState({view: 'CourseSection', name, description, courseID, res});
     }
 
+    async giveGrade(address){
+        console.log("Give address", address);
+        console.log(address);
+        const grade = await new Promise(resolveGrade => {
+            this.setState({view: 'GiveGrade',  resolveGrade});
+          });
+        this.setState({view: 'EvaluateGrade', grade, address});
+        console.log("Finish giving grade..");
+        return grade;
+    }
 
-    // async getAcceptanceOfFortune(fortune) {
-    //   return await new Promise(resolveAcceptedP => {
-    //     this.setState({view: 'AcceptTerms', fortune, resolveAcceptedP});
-    //   });
-    // }
-    // fortuneAccepted(accepted) {
-    //   this.state.resolveAcceptedP(accepted);
-    //   if(!accepted){
-    //     this.setState({view: 'WaitingForTurn'});
-    //   }
-    // }
+    setGrade(grade) {
+        this.state.resolveGrade(grade); 
+    }
+  
     render() { return renderView(this, DeployerViews); }
   }
 
@@ -99,22 +106,44 @@ class App extends React.Component {
       this.state = {view: 'Attach'};
     }
     attach(ctcInfoStr) {
+        console.log("Attaching....");
       const ctc = this.props.acc.contract(backend, JSON.parse(ctcInfoStr));
       this.setState({view: 'Attaching'});
       backend.Student(ctc, this);
+      this.setState({ ctc });
+      console.log("Finished...");
     }
-    // async readFortune() {
-    //   const fortune = await new Promise(resolveFortune => {
-    //       this.setState({view: 'ReadFortune', resolveFortune});
-    //     });
-    //     console.log("Resolved");
-    //   this.setState({view: 'WaitingForResults', fortune});
-    //   console.log("Attacher exiting... fortune is:", fortune);  
-    //     return fortune;
-    // }
-    // tellFortune(fortune) { 
-    //   console.log("The fortune is:", fortune);
-    //   this.state.resolveFortune(fortune); }
+
+    async enrollCourse(){
+        console.log(this.state.ctc);
+        const res = await this.state.ctc.v.getCourse();
+       const [courseName, courseDescription, hexNum, nft] = res[1];
+       const nftBalance = parseInt((await this.props.acc.balanceOf(nft))._hex, 16);
+      
+       console.log(hexNum);
+       const courseID = parseInt(hexNum._hex, 16);
+        const enrolledCourseID = await new Promise(resolveCourse => {
+            this.setState({view: 'GetCourseID', courseName, courseDescription, courseID, resolveCourse});
+          });
+        this.setState({view: 'WaitingForResults', enrolledCourseID, nftBalance});
+        return enrolledCourseID;
+    }
+
+    setCourseID(courseID) { this.state.resolveCourse(courseID); }
+
+    async getGrade(grade){
+       console.log("Calling get grade: ");
+       const gradeInNumber = parseInt(grade._hex, 16)
+       const res = await this.state.ctc.v.getCourse();
+       const [courseName, courseDescription, hexNum, nft] = res[1];
+       const nftBalance = parseInt((await this.props.acc.balanceOf(nft))._hex, 16);
+
+       console.log(nft); 
+       console.log(hexNum);
+       const courseID = parseInt(hexNum._hex, 16);
+       this.setState({view: 'ShowResult', gradeInNumber, courseName, courseDescription, courseID, nftBalance});
+    }
+
     render() { return renderView(this, AttacherViews); }
   }
 

@@ -30,21 +30,14 @@ exports.Deploy = class extends React.Component {
   }
 }
 
-exports.WaitingForTurn = class extends React.Component {
-  render() {
-    return (
-      <div>
-        Waiting for to again read the fortune...
-      </div>
-    );
-  }
-}
+
+
 
 exports.SetCourseDetails = class extends React.Component {
   render() {
     const {parent} = this.props;
-    let courseName =(this.state || {}).fortune || "default";
-    let courseDescription =(this.state || {}).fortune || "default";
+    let courseName = "default";
+    let courseDescription = "default";
     
     function handleClick() {
       console.log("Handle click, name and description are: ", courseName, courseDescription);
@@ -84,6 +77,62 @@ exports.SetCourseDetails = class extends React.Component {
         >Set course details</button>
       </div>
     );
+  }
+}
+
+exports.GiveGrade = class extends React.Component {
+  render() {
+    const {parent} = this.props;
+    let grade =0;
+    function handleClick() {
+      console.log("Handle click, grade: ", grade);
+     
+      parent.setGrade(grade);
+    }
+
+   
+    function handleChange(e){
+      console.log("Changed Value:", e.currentTarget.value);
+      grade = parseInt(e.currentTarget.value);
+      console.log("Grade is ", grade);
+    }
+
+    return (
+      <div>
+        
+        <input
+          type='number'
+          placeholder="Grade"
+          onChange={(e) => handleChange(e)}
+        /> 
+        <br />
+        <button
+        
+          onClick={handleClick}
+        >Set grade</button>
+      </div>
+    );
+  }
+}
+
+exports.EvaluateGrade = class extends React.Component {
+  render() {
+    const {parent, grade, address} = this.props;
+    if (grade > 80){
+      return (
+        <div>
+          Issuing Certificate to {address}.
+        </div>
+      );
+    }
+    else{
+      return (
+        <div>
+          Did not earn certificate.
+        </div>
+      );
+    }
+   
   }
 }
 
@@ -128,7 +177,7 @@ exports.WaitingForAttacher = class extends React.Component {
   
 
   render() {
-    const {parent, ctcInfoStr, nftId} = this.props;
+    const {parent, ctcInfoStr, nftId, nftBalance} = this.props;
     return (
       <div>
         Waiting for Attacher to join...
@@ -141,6 +190,8 @@ exports.WaitingForAttacher = class extends React.Component {
         >Copy to clipboard</button>
         <br />
         <h3>NFT Address: {nftId}</h3>
+        <br />
+        <h3>NFT Balance: {nftBalance}</h3>
         <br />
 
         <button onClick={() => parent.showCourse()}>Go to course</button>
